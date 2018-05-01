@@ -11,6 +11,7 @@ from tkinter import ttk
 import cvxopt
 import cvxopt.glpk
 
+#read_xls函数用于读取excel文件，并进行预处理，将无空闲时间的人删掉
 def read_xls(path):
     Excel_data = pd.read_excel(path, index = 0)
     table = Excel_data.iloc[0:, 1:]
@@ -21,9 +22,9 @@ def read_xls(path):
     table = table.values
     name = Excel_data.name
     name = name.values
-    
     return table, name
 
+#creat_A函数用于构造约束矩阵
 def create_A(data, max_work, max_people, min_people):
     size = data.shape
     n = size[0] * size[1]
@@ -45,6 +46,7 @@ def create_A(data, max_work, max_people, min_people):
     b[size[0] * 2 + size[1]*2, 0] = 1
     return f, A, b
 
+#solve函数用于求解问题答案
 def solve(f, A, b, n):
     cvxopt.glpk.options['msg_lev'] = 'GLP_MSG_OFF'
     f = cvxopt.matrix(f, tc = 'd')
@@ -61,12 +63,14 @@ def solve(f, A, b, n):
         x = np.matrix(x)
         return x, f.dot(x)
 
+#change函数用于更改解，由于解不唯一，不满意可以更改
 def change(f, A, b, X, fval, n):
     A = np.vstack((A, X.T))
     b = np.vstack((b, fval))
     s, fval = solve(f, A, b, n)
     return A, b, s, fval
 
+#handle)list函数将结果转化为人名组合
 def handle_list(x, name):
     p = [''] * (x.size // name.size)
     people = name.size
@@ -77,6 +81,7 @@ def handle_list(x, name):
             p[i//people] = p[i//people] + name[i % people]
     return p
 
+#ask_choice函数用于弹出窗口，并可以更改结果，目前还未完成
 def ask_choice(table, name):
     win = tkinter.Tk()
     tree = ttk.Treeview(win)
@@ -113,6 +118,7 @@ def cal_work(table, p_num):
             ck[t] = ck[t] + 1
     return ck
 
+#output函数用于输出结果到excel
 def output(table, name, path):
     writer = pd.ExcelWriter(path)
     ck = cal_work(table, name.size)
@@ -148,6 +154,7 @@ def main():
     ask_choice(X, name)
     output(X, name, output_path)
 '''
+    此段代码可用于寻找解空间方差最小的解，也就是排班比较均匀的，但解空间较大，算力有限，待完善
     X1 = X
     count = 0
     while(X1 is not None):
@@ -156,10 +163,10 @@ def main():
         if(np.var(X1) < np.var(X)):
             X = X1
 '''
-   
- #       ask_choice(X, name)
- #       if (X is None):
-           # print('没有其他方案了')
-#        ask_choice(X, name)
-    
+'''
+    此段代码用于更改选择，但解空间较大，且窗口函数还在编写中，暂时闲置
+       ask_choice(X, name)
+       if (X is None):
+           print('没有其他方案了')
+''' 
 main()
