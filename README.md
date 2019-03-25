@@ -1,2 +1,2 @@
 # arrange_work_table
-Given the matrix of available time, it can be used to arrange the time table for work.
+Given the matrix of available time, it can output the arranged time table for all employees.
